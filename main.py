@@ -112,7 +112,7 @@ class Classifier(nn.Module):
         node_feat, labels = self.PrepareFeatureLabel(batch_graph)
         embed = self.s2v(batch_graph, node_feat, None)
         return embed, labels
-        
+
 
 def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_args.batch_size):
     total_loss = []
@@ -147,14 +147,14 @@ def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_arg
     total_loss = np.array(total_loss)
     avg_loss = np.sum(total_loss, 0) / n_samples
     all_scores = torch.cat(all_scores).cpu().numpy()
-    
+
     # np.savetxt('test_scores.txt', all_scores)  # output test predictions
-    
+
     all_targets = np.array(all_targets)
     fpr, tpr, _ = metrics.roc_curve(all_targets, all_scores, pos_label=1)
     auc = metrics.auc(fpr, tpr)
     avg_loss = np.concatenate((avg_loss, [auc]))
-    
+
     return avg_loss
 
 
