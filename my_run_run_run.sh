@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #input arguments
-gm="${1-DGCNN}"
+gm="${1-AttPool}"
 max_type="${3-gfusedmax}" #softmax, sparsemax, gfusedmax 
 norm_flag="${4-True}" #layer_norm_flag for attention 
 gamma=${5-1.0} #gamma controlling the sparsity, the smaller the sparser 
