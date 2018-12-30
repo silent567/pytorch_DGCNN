@@ -15,5 +15,5 @@ dataset_num=${#array[@]}
 
 for (( i=$begin; i<$begin+$end; ++i ));
 do
-    ./my_run.sh $dataset_name[$i] $gm 0 $GPU $max_type $norm_flag $gamma $lam&
+    ./my_run.sh ${dataset_name[$i]} $gm 0 $GPU $max_type $norm_flag $gamma $lam
 done
