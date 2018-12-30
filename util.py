@@ -30,6 +30,11 @@ cmd_opt.add_argument('-dropout', type=bool, default=False, help='whether add dro
 cmd_opt.add_argument('-printAUC', type=bool, default=False, help='whether to print AUC (for binary classification only)')
 cmd_opt.add_argument('-extract_features', type=bool, default=False, help='whether to extract final graph features')
 
+cmd_opt.add_argument('-gamma', type=float, default=1.0, help='gamma controlling the sparsity of gfusedmax\'s output (the smaller, the sparser)')
+cmd_opt.add_argument('-lam', type=float, default=1.0, help='lambda controlling the smoothness of gfusedmax\'s output (the larger, the smoother)')
+cmd_opt.add_argument('-norm_flag', type=bool, default=True, help='whether add layer norm layer before gfusedmax')
+cmd_opt.add_argument('-max_type', default='gfusedmax', choices=['softmax','sparsemax','gfusedmax'], help='mapping function utilized in attentional pooling')
+
 cmd_args, _ = cmd_opt.parse_known_args()
 
 cmd_args.latent_dim = [int(x) for x in cmd_args.latent_dim.split('-')]
@@ -52,7 +57,7 @@ class S2VGraph(object):
 
         if len(g.edges()) != 0:
             x, y = zip(*g.edges())
-            self.num_edges = len(x)        
+            self.num_edges = len(x)
             self.edge_pairs = np.ndarray(shape=(self.num_edges, 2), dtype=np.int32)
             self.edge_pairs[:, 0] = x
             self.edge_pairs[:, 1] = y

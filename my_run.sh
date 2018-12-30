@@ -5,11 +5,15 @@ DATA="${1-DD}"  # MUTAG, ENZYMES, NCI1, NCI109, DD, PTC, PROTEINS, COLLAB, IMDBB
 gm="${2-DGCNN}"  # if specified, use the last test_number graphs as test data
 fold=${3-1}  # which fold as testing data
 GPU=${4-0}  # select the GPU number
-test_number=${4-0}  # if specified, use the last test_number graphs as test data
+max_type="${5-gfusedmax}" #softmax, sparsemax, gfusedmax 
+norm_flag="${6-True}" #layer_norm_flag for attention 
+gamma=${7-1.0} #gamma controlling the sparsity, the smaller the sparser 
+lam=${8-1.0} #lambda controlling the smoothness, the larger the smoother
+test_number=${9-0}  # if specified, use the last test_number graphs as test data
 
 # general settings
 #gm=DGCNN  # model
-gpu_or_cpu=gpu
+gpu_or_cpu=cpu
 CONV_SIZE="32-32-32-1"
 sortpooling_k=0.6  # If k <= 1, then k is set to an integer so that k% of graphs have nodes less than this integer
 FP_LEN=0  # final dense layer's input dimension, decided by data
@@ -68,7 +72,8 @@ IMDBMULTI)
   ;;
 esac
 
-result_file="${gm}_${DATA}_acc_results.txt"
+result_file=$(echo "${gm} ${DATA} ${max_type} ${norm_flag} ${gamma} ${lam}" | awk '{printf "%s_%s_acc_results_%s_%d_%.2f_%.2f.txt",$1,$2,$3,($4=="True")?1:0,$5,$6}')
+echo $result_file
 if [ ${fold} == 0 ]; then
   rm ${result_file}
   echo "Running 10-fold cross validation"
@@ -88,7 +93,11 @@ if [ ${fold} == 0 ]; then
         -batch_size $bsize \
         -gm $gm \
         -mode $gpu_or_cpu \
-        -dropout $dropout
+        -dropout $dropout \
+        -max_type $max_type \ 
+        -norm_flag $norm_flag \
+        -gamma $gamma \
+        -lam $lam
   done
   stop=`date +%s`
   echo "End of cross-validation"
@@ -113,4 +122,8 @@ else
       -mode $gpu_or_cpu \
       -dropout $dropout \
       -test_number ${test_number}
+      -max_type $max_type \ 
+      -norm_flag $norm_flag \
+      -gamma $gamma \
+      -lam $lam
 fi
