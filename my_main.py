@@ -12,7 +12,7 @@ import torch.optim as optim
 import math
 import pdb
 from DGCNN_embedding import DGCNN
-from my_embedding import SumPool
+from my_embedding import SumPool, MeanPool, MaxPool
 from mlp_dropout import MLPClassifier
 from sklearn import metrics
 
@@ -32,11 +32,15 @@ class Classifier(nn.Module):
             model = DGCNN
         elif cmd_args.gm == 'SumPool':
             model = SumPool
+        elif cmd_args.gm == 'MeanPool':
+            model = MeanPool
+        elif cmd_args.gm == 'MaxPool':
+            model = MaxPool
         else:
             print('unknown gm %s' % cmd_args.gm)
             sys.exit()
 
-        if cmd_args.gm in ['DGCNN','SumPool']:
+        if cmd_args.gm in ['DGCNN','SumPool','MeanPool','MaxPool']:
             self.s2v = model(latent_dim=cmd_args.latent_dim,
                             output_dim=cmd_args.out_dim,
                             num_node_feats=cmd_args.feat_dim+cmd_args.attr_dim,
@@ -50,7 +54,7 @@ class Classifier(nn.Module):
                             max_lv=cmd_args.max_lv)
         out_dim = cmd_args.out_dim
         if out_dim == 0:
-            if cmd_args.gm in ['DGCNN','SumPool']:
+            if cmd_args.gm in ['DGCNN','SumPool','MeanPool','MaxPool']:
                 out_dim = self.s2v.dense_dim
             else:
                 out_dim = cmd_args.latent_dim
@@ -198,7 +202,7 @@ if __name__ == '__main__':
             test_loss[2] = 0.0
         print('\033[93maverage test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, test_loss[0], test_loss[1], test_loss[2]))
 
-    with open('acc_results.txt', 'a+') as f:
+    with open('%s_%s_acc_results.txt'%(cmd_args.gm,cmd_args.data), 'a+') as f:
         f.write(str(test_loss[1]) + '\n')
 
     if cmd_args.printAUC:
