@@ -10,6 +10,7 @@ norm_flag="${6-True}" #layer_norm_flag for attention
 gamma=${7-1.0} #gamma controlling the sparsity, the smaller the sparser 
 lam=${8-1.0} #lambda controlling the smoothness, the larger the smoother
 test_number=${9-0}  # if specified, use the last test_number graphs as test data
+echo "$max_type $norm_flag"
 
 # general settings
 #gm=DGCNN  # model
@@ -94,7 +95,7 @@ if [ ${fold} == 0 ]; then
         -gm $gm \
         -mode $gpu_or_cpu \
         -dropout $dropout \
-        -max_type $max_type \ 
+        -max_type $max_type \
         -norm_flag $norm_flag \
         -gamma $gamma \
         -lam $lam
