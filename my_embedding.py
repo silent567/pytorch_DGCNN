@@ -380,7 +380,9 @@ class AttPool(nn.Module):
             graph_size_cumsum[i] += graph_size_cumsum[i-1]
         graph_size_cumsum = [0,] + graph_size_cumsum
 
-        '''max pooling'''
+        if torch.sum(torch.isnan(cur_message_layer)):
+            raise ValueError('Nan in cur_message_layer of size '+str(cur_message_layer.size()))
+        '''Attentional pooling'''
         to_dense = torch.cat([self.att_aggr(cur_message_layer[graph_size_cumsum[i]:graph_size_cumsum[i+1]].unsqueeze(0),
                           build_graph(graph_list[i])) for i in range(len(graph_sizes))])
 

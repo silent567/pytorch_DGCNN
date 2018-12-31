@@ -133,7 +133,7 @@ class ConvAddAttention(torch.nn.Module):
         self.gamma = self.gamma.to(device)
 
 def l2_norm(x,dim):
-    x = (x - torch.mean(x,dim=dim,keepdim=True))/torch.std(x,dim=dim,keepdim=True)
+    x = (x - torch.mean(x,dim=dim,keepdim=True))/(torch.std(x,dim=dim,keepdim=True)+1e-7)
     return x
 
 
@@ -168,7 +168,8 @@ class FlexAddAttention(torch.nn.Module):
             if channel_num is not None:
                 self.score_norm = torch.nn.LayerNorm([self.channel_num,1])
             else:
-                self.score_norm = lambda x:l2_norm(x,-2)
+                self.score_norm = lambda x:torch.nn.functional.LayerNorm(x,[self.channel_num,1])
+                # self.score_norm = lambda x:l2_norm(x,-2)
         else:
             self.score_norm = lambda x:x
     def forward(self,x,A,q=None):
@@ -181,13 +182,29 @@ class FlexAddAttention(torch.nn.Module):
         # print(x.size(),A.size(),q.size())
         N,M,C = x.size()
 
+        if torch.sum(torch.isnan(x)) > 0:
+            raise ValueError('Nan in FlexAddAttention x')
+        if torch.sum(torch.isnan(A)) > 0:
+            raise ValueError('Nan in FlexAddAttention A')
         proj_x = self.proj_func(x) #[N,M,C'']
         if x.size()[1] < 2:
             return proj_x[:,0]
+        if torch.sum(torch.isnan(self.proj_func.bias)) > 0:
+            raise ValueError('Nan in FlexAddAttention proj_func.bias')
+        if torch.sum(torch.isnan(self.proj_func.weight)) > 0:
+            raise ValueError('Nan in FlexAddAttention proj_func.weight')
+        if torch.sum(torch.isnan(proj_x)) > 0:
+            raise ValueError('Nan in FlexAddAttention proj_x')
         score_x = self.score_func(x if self.query_size < 1 else torch.cat(
-            [x,q.unsqueeze_(1).expand(-1,M,-1)],dim=-1)) #[N,M,1]
+            [x,q.unsqueeze(1).expand(-1,M,-1)],dim=-1)) #[N,M,1]
+        if torch.sum(torch.isnan(score_x)) > 0:
+            raise ValueError('Nan in FlexAddAttention score_x')
         weights = self.mapping_func(self.score_norm(score_x),-2,A)
+        if torch.sum(torch.isnan(weights)) > 0:
+            raise ValueError('Nan in FlexAddAttention weights')
         output = torch.sum(proj_x * weights,dim=-2)
+        if torch.sum(torch.isnan(output)) > 0:
+            raise ValueError('Nan in FlexAddAttention output')
 
         return output
 
