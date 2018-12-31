@@ -13,7 +13,7 @@ end=${8-10}
 declare -a dataset_name=("MUTAG" "ENZYMES" "NCI1" "NCI109" "DD" "PTC" "PROTEINS" "COLLAB" "IMDBBINARY" "IMDBMULTI")
 dataset_num=${#array[@]}
 
-for (( i=$begin; i<$begin+$end; ++i ));
+for (( i=$begin; i<$begin+$end; i++ ));
 do
     ./my_run.sh ${dataset_name[$i]} $gm 0 $GPU $max_type $norm_flag $gamma $lam
 done
