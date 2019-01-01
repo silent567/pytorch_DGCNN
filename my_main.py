@@ -13,7 +13,7 @@ import math
 import pdb
 from DGCNN_embedding import DGCNN
 from my_embedding import SumPool, MeanPool, MaxPool, AttPool
-from mlp_dropout import MLPClassifier
+from my_mlp import MLPClassifier
 from sklearn import metrics
 
 sys.path.append('%s/pytorch_structure2vec-master/s2v_lib' % os.path.dirname(os.path.realpath(__file__)))
@@ -56,7 +56,8 @@ class Classifier(nn.Module):
                             max_type=cmd_args.max_type,
                             layer_norm_flag=cmd_args.norm_flag,
                             lam=cmd_args.lam,
-                            gamma=cmd_args.gamma
+                            gamma=cmd_args.gamma,
+                            batch_norm_flag=cmd_args.gnn_batch_norm_flag
                              )
         else:
             self.s2v = model(latent_dim=cmd_args.latent_dim,
@@ -70,7 +71,8 @@ class Classifier(nn.Module):
                 out_dim = self.s2v.dense_dim
             else:
                 out_dim = cmd_args.latent_dim
-        self.mlp = MLPClassifier(input_size=out_dim, hidden_size=cmd_args.hidden, num_class=cmd_args.num_class, with_dropout=cmd_args.dropout)
+        self.mlp = MLPClassifier(out_dim, cmd_args.hidden, cmd_args.num_class, cmd_args.layer_number,
+                                 with_dropout=cmd_args.dropout, with_batch_norm=cmd_args.batch_norm_flag, with_residual=cmd_args.residual_flag)
 
     def PrepareFeatureLabel(self, batch_graph):
         labels = torch.LongTensor(len(batch_graph))
@@ -132,7 +134,6 @@ class Classifier(nn.Module):
         embed = self.s2v(batch_graph, node_feat, None)
         return embed, labels
 
-
 def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_args.batch_size):
     total_loss = []
     total_iters = (len(sample_idxes) + (bsize - 1) * (optimizer is None)) // bsize
@@ -176,7 +177,7 @@ def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_arg
 
     return avg_loss
 
-def main(cmd_args)
+def main(cmd_args):
     print(cmd_args)
     random.seed(cmd_args.seed)
     np.random.seed(cmd_args.seed)
@@ -229,3 +230,4 @@ def main(cmd_args)
         np.savetxt('extracted_features_test.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
 
 if __name__ == '__main__':
+    main(cmd_args)

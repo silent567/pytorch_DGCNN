@@ -34,6 +34,10 @@ cmd_opt.add_argument('-gamma', type=float, default=1.0, help='gamma controlling 
 cmd_opt.add_argument('-lam', type=float, default=1.0, help='lambda controlling the smoothness of gfusedmax\'s output (the larger, the smoother)')
 cmd_opt.add_argument('-norm_flag', type=bool, default=True, help='whether add layer norm layer before gfusedmax')
 cmd_opt.add_argument('-max_type', default='gfusedmax', choices=['softmax','sparsemax','gfusedmax'], help='mapping function utilized in attentional pooling')
+cmd_opt.add_argument('-layer_number', type=int, default=3, help='layer number of final MLP')
+cmd_opt.add_argument('-batch_norm_flag', type=bool, default=True, help='whether add batch norm layer for final MLP')
+cmd_opt.add_argument('-residual_flag', type=bool, default=True, help='whether utilize residual connection for final MLP')
+cmd_opt.add_argument('-gnn_batch_norm_flag', type=bool, default=True, help='whether add batch norm layer for GNN\'s output')
 
 cmd_args, _ = cmd_opt.parse_known_args()
 

@@ -57,7 +57,7 @@ class SumPool(nn.Module):
 
         n2n_sp, e2n_sp, subg_sp = S2VLIB.PrepareMeanField(graph_list)
 
-        if isinstance(node_feat, torch.cuda.FloatTensor):
+        if 'cuda' in str(node_feat.device):
             n2n_sp = n2n_sp.cuda()
             e2n_sp = e2n_sp.cuda()
             subg_sp = subg_sp.cuda()
@@ -149,7 +149,7 @@ class MeanPool(nn.Module):
 
         n2n_sp, e2n_sp, subg_sp = S2VLIB.PrepareMeanField(graph_list)
 
-        if isinstance(node_feat, torch.cuda.FloatTensor):
+        if 'cuda' in str(node_feat.device):
             n2n_sp = n2n_sp.cuda()
             e2n_sp = e2n_sp.cuda()
             subg_sp = subg_sp.cuda()
@@ -241,7 +241,7 @@ class MaxPool(nn.Module):
 
         n2n_sp, e2n_sp, subg_sp = S2VLIB.PrepareMeanField(graph_list)
 
-        if isinstance(node_feat, torch.cuda.FloatTensor):
+        if 'cuda' in str(node_feat.device):
             n2n_sp = n2n_sp.cuda()
             e2n_sp = e2n_sp.cuda()
             subg_sp = subg_sp.cuda()
@@ -303,7 +303,7 @@ def build_graph(graph):
 
 class AttPool(nn.Module):
     def __init__(self, output_dim, num_node_feats, num_edge_feats, latent_dim=[32, 32, 32, 1]
-                 ,max_type='gfusedmax',layer_norm_flag=True,lam=1.0,gamma=1.0):
+                 ,max_type='gfusedmax',layer_norm_flag=True,lam=1.0,gamma=1.0,batch_norm_flag=True):
         print('Initializing AttPool')
         super(AttPool, self).__init__()
         self.latent_dim = latent_dim
@@ -319,6 +319,7 @@ class AttPool(nn.Module):
 
         self.dense_dim = self.total_latent_dim
 
+        self.batch_norm = torch.nn.BatchNorm1d(self.total_latent_dim) if batch_norm_flag else lambda x:x
         self.att_aggr = FlexAddAttention(self.dense_dim,self.dense_dim,None,max_type,layer_norm_flag,lam,gamma)
 
         if num_edge_feats > 0:
@@ -375,6 +376,7 @@ class AttPool(nn.Module):
             lv += 1
 
         cur_message_layer = torch.cat(cat_message_layers, 1)
+        cur_message_layer = self.batch_norm(cur_message_layer)
         graph_size_cumsum = list(graph_sizes) #copy
         for i in range(1,len(graph_size_cumsum)):
             graph_size_cumsum[i] += graph_size_cumsum[i-1]
