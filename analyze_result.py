@@ -7,7 +7,7 @@ import numpy as np
 keys = sys.argv[1:]
 
 filenames = os.listdir()
-filenames = list(filter(lambda fn: '.txt' in fn and 'acc_results' in fn and sum([k in fn for k in keys]),filenames))
+filenames = list(filter(lambda fn: '.txt' in fn and 'acc_results' in fn and np.prod([k in fn for k in keys]),filenames))
 filenames.sort()
 print(filenames)
 
