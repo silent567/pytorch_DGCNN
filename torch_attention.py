@@ -168,7 +168,7 @@ class FlexAddAttention(torch.nn.Module):
             if channel_num is not None:
                 self.score_norm = torch.nn.LayerNorm([self.channel_num,1])
             else:
-                self.score_norm = lambda x:torch.nn.functional.LayerNorm(x,[self.channel_num,1])
+                self.score_norm = lambda x:torch.nn.functional.layer_norm(x,[x.size()[-2],1])
                 # self.score_norm = lambda x:l2_norm(x,-2)
         else:
             self.score_norm = lambda x:x
