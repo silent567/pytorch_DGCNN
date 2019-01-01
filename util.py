@@ -66,8 +66,7 @@ class S2VGraph(object):
             self.num_edges = 0
             self.edge_pairs = np.array([])
 
-def load_data():
-
+def load_data(cmd_args):
     print('loading data')
     g_list = []
     label_dict = {}

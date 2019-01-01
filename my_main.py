@@ -176,14 +176,13 @@ def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_arg
 
     return avg_loss
 
-
-if __name__ == '__main__':
+def main(cmd_args)
     print(cmd_args)
     random.seed(cmd_args.seed)
     np.random.seed(cmd_args.seed)
     torch.manual_seed(cmd_args.seed)
 
-    train_graphs, test_graphs = load_data()
+    train_graphs, test_graphs = load_data(cmd_args)
     print('# train: %d, # test: %d' % (len(train_graphs), len(test_graphs)))
 
     if cmd_args.sortpooling_k <= 1:
@@ -228,3 +227,5 @@ if __name__ == '__main__':
         features, labels = classifier.output_features(test_graphs)
         labels = labels.type('torch.FloatTensor')
         np.savetxt('extracted_features_test.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
+
+if __name__ == '__main__':
