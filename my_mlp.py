@@ -40,10 +40,11 @@ class MLPRegression(nn.Module):
             return pred
 
 class MLPClassifier(nn.Module):
-    def __init__(self, input_size, hidden_size, num_class, layer_number,
+    def __init__(self, input_size, hidden_size, num_class, layer_number, l2_strength=1e-7,
                  with_dropout=False, with_batch_norm=True, with_residual=True):
         super(MLPClassifier, self).__init__()
 
+        self.l2_strength = l2_strength
         self.with_dropout = with_dropout
         self.with_batch_norm = with_batch_norm
         self.with_residual = with_residual
@@ -86,7 +87,9 @@ class MLPClassifier(nn.Module):
 
         if y is not None:
             y = Variable(y)
-            loss = F.nll_loss(logits, y)
+            l2_loss = torch.sum(torch.tensor([torch.sum(hw.weight*hw.weight)
+                                 for hw in [self.h1_weights,self.h2_weights]+self.h_weights]))
+            loss = F.nll_loss(logits, y) + l2_loss
 
             pred = logits.data.max(1, keepdim=True)[1]
             acc = pred.eq(y.data.view_as(pred)).cpu().sum().item() / float(y.size()[0])

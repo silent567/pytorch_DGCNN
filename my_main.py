@@ -22,7 +22,7 @@ from embedding import EmbedMeanField, EmbedLoopyBP
 from util import cmd_args, load_data
 
 class Classifier(nn.Module):
-    def __init__(self):
+    def __init__(self,cmd_args):
         super(Classifier, self).__init__()
         if cmd_args.gm == 'mean_field':
             model = EmbedMeanField
@@ -71,7 +71,7 @@ class Classifier(nn.Module):
                 out_dim = self.s2v.dense_dim
             else:
                 out_dim = cmd_args.latent_dim
-        self.mlp = MLPClassifier(out_dim, cmd_args.hidden, cmd_args.num_class, cmd_args.layer_number,
+        self.mlp = MLPClassifier(out_dim, cmd_args.hidden, cmd_args.num_class, cmd_args.layer_number,l2_strength=cmd_args.l2,
                                  with_dropout=cmd_args.dropout, with_batch_norm=cmd_args.batch_norm_flag, with_residual=cmd_args.residual_flag)
 
     def PrepareFeatureLabel(self, batch_graph):
@@ -192,7 +192,7 @@ def main(cmd_args):
         cmd_args.sortpooling_k = max(10, cmd_args.sortpooling_k)
         print('k used in SortPooling is: ' + str(cmd_args.sortpooling_k))
 
-    classifier = Classifier()
+    classifier = Classifier(cmd_args)
     if cmd_args.mode == 'gpu':
         classifier = classifier.cuda()
 
@@ -228,6 +228,15 @@ def main(cmd_args):
         features, labels = classifier.output_features(test_graphs)
         labels = labels.type('torch.FloatTensor')
         np.savetxt('extracted_features_test.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
+
+    return test_loss[1]
+
+def cross_validate(cmd_args):
+    acc_results = []
+    for foldn in range(1,11):
+        cmd_args.fold = foldn
+        acc_results.append(main(cmd_args))
+    return np.mean(acc_results)
 
 if __name__ == '__main__':
     main(cmd_args)
