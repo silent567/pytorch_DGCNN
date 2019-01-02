@@ -6,6 +6,6 @@ arraylength=${#arr[@]}
 
 for ((i=$2; i<$2+$3; i++));
 do
-    CUDA_VISIBLE_DEVICES=$4 python my_tune.py -data ${dataset_name[$i]} -gm $1
+    CUDA_VISIBLE_DEVICES=$4 python3 my_tune.py -data ${dataset_name[$i]} -gm $1
 done
 
