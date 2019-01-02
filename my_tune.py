@@ -4,8 +4,10 @@
 from my_main import cross_validate
 import numpy as np
 import time
+import torch
 
 from util import cmd_args
+cmd_args.mode = 'gpu' if torch.cuda.is_available() else 'cpu'
 
 hyperparameter_choices = {
     'learning_rate':list(10**np.arange(-6,-1,0.5)),
