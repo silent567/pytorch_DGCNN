@@ -28,21 +28,21 @@ graphs = []
 labels = []
 step = int(N/10)
 for s in range(0,S,step):
-    pgraph = generate_random_graph(N,prob=comm_probs)
+    pgraph = generate_random_agm_graph(N,prob=comm_probs)
     sgraph,l = random_ego_graph(pgraph,step,R)
     graphs += sgraph
     labels += l
 
 with open(data_filename,'w') as f:
-    f.write(graphs2str(graphs[:S],labels[:S]))
+    f.write('\n'.join(graphs2str(graphs[:S],labels[:S])))
 
 index = np.arange(S)
 index_per_fold = [index[fn::10] for fn in range(10)]
 for fn in range(10):
     test_idx = index_per_fold[fn]
     train_idx = np.concatenate(index_per_fold[:fn]+index_per_fold[fn+1:])
-    np.savetxt(os.path.join(idxpath,'test_idx-%d.txt'%fn),test_idx)
-    np.savetxt(os.path.join(idxpath,'train_idx-%d.txt'%fn),train_idx)
+    np.savetxt(os.path.join(idxpath,'test_idx-%d.txt'%fn),test_idx,fmt='%d')
+    np.savetxt(os.path.join(idxpath,'train_idx-%d.txt'%fn),train_idx,fmt='%d')
 
 
 

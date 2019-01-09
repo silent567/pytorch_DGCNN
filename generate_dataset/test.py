@@ -1,6 +1,8 @@
 
 # coding: utf-8
 
+# # test AGM
+
 # In[1]:
 
 
@@ -15,7 +17,7 @@ from util import *
 
 N,C = 100,3
 prob = [0.1,0.3,0.5]
-g = generate_random_graph(N,prob=prob)
+g = generate_random_agm_graph(N,prob=prob)
 
 
 # In[3]:
@@ -40,39 +42,45 @@ for sg in subgraphs:
 print(graphs2str(subgraphs,labels))
 
 
-# In[10]:
+# # test Euclidean 
+
+# In[1]:
 
 
-sg = subgraphs[0]
-sgraph = nx.to_numpy_matrix(sg)
-print(sgraph.shape)
-print(sgraph[0].shape)
-print(sgraph[0])
-print(sgraph[0].ravel().shape)
-print(np.nonzero(sgraph[0].ravel()))
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+from util import *
 
 
-# In[14]:
+# In[27]:
 
 
-x = np.arange(-2, 3,0.5).reshape([1,-1])
-print(x.shape)
-print(x.ravel().shape)
-print(np.flatnonzero(x))
+N,C = 100,3
+means = np.array([[0.25,0.25],[0.25,0.75],[0.75,0.5]])
+stds = np.stack([np.eye(2)/20/i for i in range(1,C+1)])
+sparsity = 0.1
+g = generate_random_eucl_graph(N,C,means,stds,sparsity=sparsity)
 
 
-# In[15]:
+# In[28]:
 
 
-print(sgraph.dtype)
-print(x.dtype)
+plot_graph(g)
 
 
-# In[19]:
+# In[29]:
 
 
-ggraph = nx.to_numpy_matrix(g)
-print(type(ggraph))
-print(ggraph.shape)
-print(ggraph.ravel().shape)
+subgraphs,labels = random_ego_graph(g,3,radius=1)
+print(labels)
+for sg in subgraphs:
+    plot_graph(sg)
+    plt.show()
+
+
+# In[6]:
+
+
+print(graphs2str(subgraphs,labels))
 
