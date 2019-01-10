@@ -229,6 +229,10 @@ def main(cmd_args):
         labels = labels.type('torch.FloatTensor')
         np.savetxt('extracted_features_test.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
 
+    if (cmd_args.save_model):
+        torch.save(classifier.state_dict(),'model_%s_%s_%s_%d_%.2f_%.2f.pt'%
+                   (cmd_args.gm,cmd_args.data,cmd_args.max_type,int(cmd_args.norm_flag),cmd_args.gamma,cmd_args.lam))
+
     return test_loss[1]
 
 def cross_validate(cmd_args):

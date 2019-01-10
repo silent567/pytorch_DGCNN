@@ -40,6 +40,8 @@ cmd_opt.add_argument('-residual_flag', type=bool, default=True, help='whether ut
 cmd_opt.add_argument('-gnn_batch_norm_flag', type=bool, default=True, help='whether add batch norm layer for GNN\'s output')
 cmd_opt.add_argument('-l2', type=float, default=1e-3, help='l2 controlling the regularization strength')
 
+cmd_opt.add_argument('-save_model', type=bool, default=False, help='For Saving the current Model')
+
 cmd_args, _ = cmd_opt.parse_known_args()
 
 cmd_args.latent_dim = [int(x) for x in cmd_args.latent_dim.split('-')]

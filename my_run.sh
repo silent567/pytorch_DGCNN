@@ -15,6 +15,7 @@ echo "$max_type $norm_flag"
 # general settings
 #gm=DGCNN  # model
 gpu_or_cpu=gpu
+save_model=True
 CONV_SIZE="32-32-32-1"
 sortpooling_k=0.6  # If k <= 1, then k is set to an integer so that k% of graphs have nodes less than this integer
 FP_LEN=0  # final dense layer's input dimension, decided by data
@@ -68,7 +69,7 @@ IMDBMULTI)
   sortpooling_k=0.9
   ;;
 *)
-  num_epochs=500
+  num_epochs=100
   learning_rate=0.00001
   ;;
 esac
@@ -126,5 +127,6 @@ else
       -max_type $max_type \ 
       -norm_flag $norm_flag \
       -gamma $gamma \
-      -lam $lam
+      -lam $lam \
+      -save_model $save_model
 fi
