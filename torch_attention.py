@@ -181,6 +181,8 @@ class FlexAddAttention(torch.nn.Module):
         '''
         # print(x.size(),A.size(),q.size())
         N,M,C = x.size()
+        if (M < 1):
+            return torch.zeros([N,self.output_size],dtype=x.dtype,device=x.get_device())
 
         if torch.sum(torch.isnan(x)) > 0:
             raise ValueError('Nan in FlexAddAttention x')
