@@ -1,6 +1,13 @@
 
 # coding: utf-8
 
+# In[1]:
+
+
+get_ipython().run_line_magic('load_ext', 'autoreload')
+get_ipython().run_line_magic('autoreload', '2')
+
+
 # # test AGM
 
 # In[1]:
@@ -83,4 +90,63 @@ for sg in subgraphs:
 
 
 print(graphs2str(subgraphs,labels))
+
+
+# # test noise
+
+# In[9]:
+
+
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+from util import *
+
+
+# In[13]:
+
+
+g = generate_random_agm_graph(10,3)
+plot_graph(g)
+plt.show()
+
+
+# In[14]:
+
+
+add_noises_to_graph(g,3)
+plot_graph(g)
+plt.show()
+
+
+# # test common graph generator
+
+# In[125]:
+
+
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+from util import *
+
+
+# In[124]:
+
+
+g = generate_random_shrinking_tree(r_max=10,h_max=4)
+plot_graph(g)
+plt.show()
+nx.draw(g)
+plt.show()
+print(np.sum(nx.to_numpy_array(g),axis=1))
+
+
+# In[632]:
+
+
+g,l = generate_random_classical_graph()
+plot_graph(g)
+plt.show()
+nx.draw(g)
+plt.show()
 
