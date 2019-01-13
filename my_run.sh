@@ -14,7 +14,7 @@ echo "$max_type $norm_flag"
 
 # general settings
 #gm=DGCNN  # model
-gpu_or_cpu=gpu
+gpu_or_cpu=cpu
 save_model=True
 CONV_SIZE="32-32-32-1"
 sortpooling_k=0.6  # If k <= 1, then k is set to an integer so that k% of graphs have nodes less than this integer
@@ -123,8 +123,8 @@ else
       -gm $gm \
       -mode $gpu_or_cpu \
       -dropout $dropout \
-      -test_number ${test_number}
-      -max_type $max_type \ 
+      -test_number ${test_number} \
+      -max_type $max_type \
       -norm_flag $norm_flag \
       -gamma $gamma \
       -lam $lam \
