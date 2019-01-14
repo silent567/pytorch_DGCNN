@@ -22,15 +22,15 @@ cmd_opt.add_argument('-test_number', type=int, default=0, help='if specified, wi
 cmd_opt.add_argument('-num_epochs', type=int, default=1000, help='number of epochs')
 cmd_opt.add_argument('-latent_dim', type=str, default='32-32-32-1', help='dimension(s) of latent layers')
 cmd_opt.add_argument('-sortpooling_k', type=float, default=30, help='number of nodes kept after SortPooling')
-cmd_opt.add_argument('-out_dim', type=int, default=1024, help='s2v output size')
-cmd_opt.add_argument('-hidden', type=int, default=100, help='dimension of regression')
+cmd_opt.add_argument('-out_dim', type=int, default=0, help='s2v output size')
+cmd_opt.add_argument('-hidden', type=int, default=128, help='dimension of regression')
 cmd_opt.add_argument('-max_lv', type=int, default=4, help='max rounds of message passing')
 cmd_opt.add_argument('-learning_rate', type=float, default=0.0001, help='init learning_rate')
-cmd_opt.add_argument('-dropout', type=bool, default=False, help='whether add dropout after dense layer')
+cmd_opt.add_argument('-dropout', type=bool, default=True, help='whether add dropout after dense layer')
 cmd_opt.add_argument('-printAUC', type=bool, default=False, help='whether to print AUC (for binary classification only)')
 cmd_opt.add_argument('-extract_features', type=bool, default=False, help='whether to extract final graph features')
 
-cmd_opt.add_argument('-gamma', type=float, default=1.0, help='gamma controlling the sparsity of gfusedmax\'s output (the smaller, the sparser)')
+cmd_opt.add_argument('-gamma', type=float, default=10.0, help='gamma controlling the sparsity of gfusedmax\'s output (the smaller, the sparser)')
 cmd_opt.add_argument('-lam', type=float, default=1.0, help='lambda controlling the smoothness of gfusedmax\'s output (the larger, the smoother)')
 cmd_opt.add_argument('-norm_flag', type=bool, default=True, help='whether add layer norm layer before gfusedmax')
 cmd_opt.add_argument('-max_type', default='gfusedmax', choices=['softmax','sparsemax','gfusedmax'], help='mapping function utilized in attentional pooling')
@@ -39,6 +39,7 @@ cmd_opt.add_argument('-batch_norm_flag', type=bool, default=True, help='whether 
 cmd_opt.add_argument('-residual_flag', type=bool, default=True, help='whether utilize residual connection for final MLP')
 cmd_opt.add_argument('-gnn_batch_norm_flag', type=bool, default=True, help='whether add batch norm layer for GNN\'s output')
 cmd_opt.add_argument('-l2', type=float, default=1e-3, help='l2 controlling the regularization strength')
+cmd_opt.add_argument('-head_cnt', type=int, default=2, help='Number of parallel attentional aggregators')
 
 cmd_opt.add_argument('-save_model', type=bool, default=False, help='For Saving the current Model')
 

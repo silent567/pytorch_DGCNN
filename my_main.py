@@ -12,7 +12,7 @@ import torch.optim as optim
 import math
 import pdb
 from DGCNN_embedding import DGCNN
-from my_embedding import SumPool, MeanPool, MaxPool, AttPool
+from my_embedding import SumPool, MeanPool, MaxPool, AttPool, MultiAttPool
 from my_mlp import MLPClassifier
 from sklearn import metrics
 
@@ -38,6 +38,8 @@ class Classifier(nn.Module):
             model = MaxPool
         elif cmd_args.gm == 'AttPool':
             model = AttPool
+        elif cmd_args.gm == 'MultiAttPool':
+            model = MultiAttPool
         else:
             print('unknown gm %s' % cmd_args.gm)
             sys.exit()
@@ -59,6 +61,18 @@ class Classifier(nn.Module):
                             gamma=cmd_args.gamma,
                             batch_norm_flag=cmd_args.gnn_batch_norm_flag
                              )
+        elif cmd_args.gm in ['MultiAttPool']:
+            self.s2v = model(latent_dim=cmd_args.latent_dim,
+                            output_dim=cmd_args.out_dim,
+                            num_node_feats=cmd_args.feat_dim+cmd_args.attr_dim,
+                            num_edge_feats=0,
+                            max_type=cmd_args.max_type,
+                            layer_norm_flag=cmd_args.norm_flag,
+                            lam=cmd_args.lam,
+                            gamma=cmd_args.gamma,
+                            batch_norm_flag=cmd_args.gnn_batch_norm_flag,
+                            head_cnt=cmd_args.head_cnt
+                             )
         else:
             self.s2v = model(latent_dim=cmd_args.latent_dim,
                             output_dim=cmd_args.out_dim,
@@ -67,7 +81,7 @@ class Classifier(nn.Module):
                             max_lv=cmd_args.max_lv)
         out_dim = cmd_args.out_dim
         if out_dim == 0:
-            if cmd_args.gm in ['DGCNN','SumPool','MeanPool','MaxPool','AttPool']:
+            if cmd_args.gm in ['DGCNN','SumPool','MeanPool','MaxPool','AttPool','MultiAttPool']:
                 out_dim = self.s2v.dense_dim
             else:
                 out_dim = cmd_args.latent_dim
