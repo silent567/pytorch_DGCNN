@@ -87,9 +87,9 @@ class MLPClassifier(nn.Module):
 
         if y is not None:
             y = Variable(y)
-            l2_loss = torch.sum(torch.tensor([torch.sum(hw.weight*hw.weight)
+            l2_loss = torch.sum(torch.stack([torch.sum(hw.weight*hw.weight)
                                  for hw in [self.h1_weights,self.h2_weights]+self.h_weights]))
-            loss = F.nll_loss(logits, y) + l2_loss
+            loss = F.nll_loss(logits, y) + self.l2_strength*l2_loss
 
             pred = logits.data.max(1, keepdim=True)[1]
             acc = pred.eq(y.data.view_as(pred)).cpu().sum().item() / float(y.size()[0])
