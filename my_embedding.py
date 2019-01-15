@@ -505,7 +505,7 @@ class FastAttPool(nn.Module):
     def __init__(self, output_dim, num_node_feats, num_edge_feats, latent_dim=[32, 32, 32, 1]
                  ,max_type='gfusedmax',layer_norm_flag=True,lam=1.0,gamma=1.0,batch_norm_flag=True):
         print('Initializing AttPool')
-        super(FastAttPoolTest, self).__init__()
+        super(FastAttPool, self).__init__()
         self.latent_dim = latent_dim
         self.output_dim = output_dim
         self.num_node_feats = num_node_feats
@@ -530,17 +530,11 @@ class FastAttPool(nn.Module):
         weights_init(self)
 
     def forward(self, graph_list, node_feat, edge_feat):
-        global embedding_time_sum, embedding_time_cnt
-        ft = lt = time.time()
-        # print(type(graph_list[0]))
-        # print(graph_list[0].__dict__.keys())
-        # print(graph_list[0].num_edges,len(graph_list[0].edge_pairs))
         graph_sizes = [graph_list[i].num_nodes for i in range(len(graph_list))]
         node_degs = [torch.Tensor(graph_list[i].degs) + 1 for i in range(len(graph_list))]
         node_degs = torch.cat(node_degs).unsqueeze(1)
 
         n2n_sp, e2n_sp, subg_sp = S2VLIB.PrepareMeanField(graph_list)
-        lt = time.time()
 
         if 'cuda' in str(node_feat.device):
             n2n_sp = n2n_sp.cuda()
@@ -555,12 +549,7 @@ class FastAttPool(nn.Module):
         subg_sp = Variable(subg_sp)
         node_degs = Variable(node_degs)
 
-        lt = time.time()
         h = self.sortpooling_embedding(node_feat, edge_feat, n2n_sp, e2n_sp, subg_sp, graph_sizes, node_degs, graph_list)
-        embedding_time_sum += time.time()-lt
-        embedding_time_cnt += 1
-        print('average embedding time:',embedding_time_sum/embedding_time_cnt)
-        # print('total forward time:',time.time()-ft)
         return h
 
     def sortpooling_embedding(self, node_feat, edge_feat, n2n_sp, e2n_sp, subg_sp, graph_sizes, node_degs, graph_list):

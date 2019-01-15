@@ -2,7 +2,7 @@
 # coding=utf-8
 
 import torch
-from mapping import sparsemax, gfusedlasso, gfusedmax, gfusedmax_with_edge
+from mapping import sparsemax, gfusedlasso, gfusedmax, gfusedlasso_with_edge
 import numpy as np
 import multiprocessing as mp
 
@@ -155,7 +155,7 @@ class torch_gfusedlasso_list(torch.autograd.Function):
         if len(edge_list) == 1 and len(M_cumsum) != 2:
             edge_list = edge_list*(len(M_cumsum)-1)
 
-        inp = inp.numpy() #[N*M]
+        inp = inp.detach().numpy() #[N*M]
         inp_list = [inp[M_cumsum[i]:M_cumsum[i+1]] for i in range(len(M_cumsum)-1)] #[M]*N
         output_list = mp_pool.starmap(gfusedlasso_with_edge,zip(inp_list,edge_list,[lam]*len(inp_list))) #[M]*N
         output = torch.from_numpy(np.concatenate(output_list)) #[N*M]
