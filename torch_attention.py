@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-from torch_mapping import torch_sparsemax, Gfusedmax
+from torch_mapping import torch_sparsemax, Gfusedmax, GfusedmaxList
 import torch
 import numpy as np
 
@@ -207,6 +207,80 @@ class FlexAddAttention(torch.nn.Module):
         output = torch.sum(proj_x * weights,dim=-2)
         if torch.sum(torch.isnan(output)) > 0:
             raise ValueError('Nan in FlexAddAttention output')
+
+        return output
+
+def maxList(x,M_cumsum,map_func):
+    return [map_func(x[M_cumsum[i]:M_cumsum[i+1]]) for i in range(len(M_cumsum)-1)]
+
+class FastFlexAddAttention(torch.nn.Module):
+    def __init__(self,input_size,output_size,channel_num,max_type='softmax',layer_norm_flag=True,lam=1.0,gamma=1.0,query_size=0):
+        super(FastFlexAddAttention,self).__init__()
+        self.max_type = max_type
+        if max_type == 'softmax':
+            self.mapping_func = lambda x,edge_list,M_cumsum: maxList(x,M_cumsum,lambda xx:torch.nn.functional.softmax)
+        elif max_type == 'sparsemax':
+            if gamma is None:
+                self.register_parameter('gamma',torch.nn.Parameter(torch.ones([],dtype=torch.float,requires_grad=True)))
+            else:
+                self.gamma = gamma
+            self.mapping_func = lambda x,edge_list,M_cumsum: maxList(x,M_cumsum,lambda xx:torch_sparsemax.apply(xx,-1,self.gamma))
+        elif max_type == 'gfusedmax':
+            self.gamma = gamma if gamma is not None else 1.0
+            self.lam = lam if lam is not None else 1.0
+            # self.gfusedmax_module = Gfusedmax3(self.gamma,self.lam)
+            self.gfusedmax_module = GfusedmaxList(self.gamma,self.lam)
+            self.mapping_func = lambda x,graph_list,M_cumsum: self.gfusedmax_module(x,graph_list,M_cumsum)
+        else:
+            raise ValueError('Wrong max_type: %s'%max_type)
+
+        self.output_size = output_size
+        self.channel_num = channel_num
+        self.query_size = query_size
+
+        self.proj_func = torch.nn.Linear(input_size,output_size)
+        self.score_func = torch.nn.Linear(input_size+query_size,1)
+        if layer_norm_flag:
+            if channel_num is not None:
+                self.score_norm = torch.nn.LayerNorm([self.channel_num])
+            else:
+                self.score_norm = lambda x:torch.nn.functional.layer_norm(x,[x.size()[-1]]) if x.size()[-1] > 1 else x
+        else:
+            self.score_norm = lambda x:x
+    def forward(self,x_list,edge_list,q=None):
+        '''
+        x's shape = [M,C]*N
+        edge_list's shape = [[M,2]]*N
+        q's shape = [C']*N
+        return y's shape = [N,C'']
+        '''
+        N = len(x_list)
+        M_list = [x.size()[0] for x in x_list]
+        M_cumsum = [0,]+list(np.cumsum(M_list))
+        output_list = [None]*N
+        for i,m in enumerate(M_list):
+            if m == 0:
+                output_list[i] = torch.zeros([self.output_size],dtype=x[i].dtype,device=x[i].device)
+
+        x_concat = torch.cat(x_list,dim=0) #[N*M,C]
+        proj_x = self.proj_func(x_concat) #[N*M,C'']
+        for i,(m,ms) in enumerate(zip(M_list,M_cumsum)):
+            if m == 1:
+                output_list[i] = proj_x[ms]
+        score_x = self.score_func(x_concat if self.query_size < 1 else torch.cat(
+            [x_concat,torch.stack([qq for m,qq in zip(M_list,q) for _ in range(m)],dim=0)],dim=-1)) #[N*M,1]
+
+        cuda_flag = score_x.is_cuda
+        if cuda_flag:
+            score_x = score_x.cpu()
+        score_x = score_x.squeeze() #[N*M]
+        weight_list = self.mapping_func(score_x,edge_list,M_cumsum) #[M]*N
+        if cuda_flag:
+            for i,w in enumerate(weight_list):
+                weight_list[i] = w.cuda()
+
+        output_list = [torch.sum(proj_x[M_cumsum[i]:M_cumsum[i+1]]*w.unsqueeze(-1),dim=0) for i,w in enumerate(weight_list)]
+        output = torch.stack(output_list,dim=0)
 
         return output
 
