@@ -227,6 +227,9 @@ def main(cmd_args):
         if not cmd_args.printAUC:
             test_loss[2] = 0.0
         print('\033[93maverage test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, test_loss[0], test_loss[1], test_loss[2]))
+        if (cmd_args.save_model):
+            torch.save(classifier.state_dict(),'model_%s_%s_%s_%d_%.2f_%.2f.pt'%
+                    (cmd_args.gm,cmd_args.data,cmd_args.max_type,int(cmd_args.norm_flag),cmd_args.gamma,cmd_args.lam))
 
     with open('%s_%s_acc_results_%s_%d_%.2f_%.2f.txt'%(cmd_args.gm,cmd_args.data,cmd_args.max_type,int(cmd_args.norm_flag),cmd_args.gamma,cmd_args.lam), 'a+') as f:
         f.write(str(test_loss[1]) + '\n')
@@ -243,9 +246,6 @@ def main(cmd_args):
         labels = labels.type('torch.FloatTensor')
         np.savetxt('extracted_features_test.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
 
-    if (cmd_args.save_model):
-        torch.save(classifier.state_dict(),'model_%s_%s_%s_%d_%.2f_%.2f.pt'%
-                   (cmd_args.gm,cmd_args.data,cmd_args.max_type,int(cmd_args.norm_flag),cmd_args.gamma,cmd_args.lam))
 
     return test_loss[1]
 
