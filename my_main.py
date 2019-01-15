@@ -12,7 +12,7 @@ import torch.optim as optim
 import math
 import pdb
 from DGCNN_embedding import DGCNN
-from my_embedding import SumPool, MeanPool, MaxPool, AttPool, MultiAttPool, FastAttPool
+from my_embedding import SumPool, MeanPool, MaxPool, AttPool, MultiAttPool, FastAttPool, FastMultiAttPool
 from my_mlp import MLPClassifier
 from sklearn import metrics
 
@@ -42,6 +42,8 @@ class Classifier(nn.Module):
             model = FastAttPool
         elif cmd_args.gm == 'MultiAttPool':
             model = MultiAttPool
+        elif cmd_args.gm == 'FastMultiAttPool':
+            model = FastMultiAttPool
         else:
             print('unknown gm %s' % cmd_args.gm)
             sys.exit()
@@ -63,7 +65,7 @@ class Classifier(nn.Module):
                             gamma=cmd_args.gamma,
                             batch_norm_flag=cmd_args.gnn_batch_norm_flag
                              )
-        elif cmd_args.gm in ['MultiAttPool']:
+        elif cmd_args.gm in ['MultiAttPool','FastMultiAttPool']:
             self.s2v = model(latent_dim=cmd_args.latent_dim,
                             output_dim=cmd_args.out_dim,
                             num_node_feats=cmd_args.feat_dim+cmd_args.attr_dim,
@@ -83,7 +85,7 @@ class Classifier(nn.Module):
                             max_lv=cmd_args.max_lv)
         out_dim = cmd_args.out_dim
         if out_dim == 0:
-            if cmd_args.gm in ['DGCNN','SumPool','MeanPool','MaxPool','AttPool','MultiAttPool', 'FastAttPool']:
+            if cmd_args.gm in ['DGCNN','SumPool','MeanPool','MaxPool','AttPool','MultiAttPool', 'FastAttPool','FastMultiAttPool']:
                 out_dim = self.s2v.dense_dim
             else:
                 out_dim = cmd_args.latent_dim
