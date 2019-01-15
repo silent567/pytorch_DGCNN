@@ -2,7 +2,12 @@
 # coding=utf-8
 
 import torch
-from mapping import sparsemax, gfusedlasso, gfusedmax
+from mapping import sparsemax, gfusedlasso, gfusedmax, gfusedmax_with_edge
+import numpy as np
+import multiprocessing as mp
+
+process_num = 5
+mp_pool = mp.Pool(process_num)
 
 class torch_sparsemax(torch.autograd.Function):
     @staticmethod
@@ -135,6 +140,57 @@ class torch_gfusedlasso(torch.autograd.Function):
 
         return (grad_inp,)+(None,)*(len(ctx.needs_input_grad)-1)
 
+class torch_gfusedlasso_list(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, inp, edge_list, M_cumsum, lam=1.0):
+        '''
+        inp's shape = [N*M]
+        edge_list's shape = [[E,2]]*N
+        M_cumsum = [sum(M[:i])]*(N+1)
+        '''
+        global mp_pool
+
+        if torch.is_tensor(lam):
+            lam = float(lam.numpy())
+        if len(edge_list) == 1 and len(M_cumsum) != 2:
+            edge_list = edge_list*(len(M_cumsum)-1)
+
+        inp = inp.numpy() #[N*M]
+        inp_list = [inp[M_cumsum[i]:M_cumsum[i+1]] for i in range(len(M_cumsum)-1)] #[M]*N
+        output_list = mp_pool.starmap(gfusedlasso_with_edge,zip(inp_list,edge_list,[lam]*len(inp_list))) #[M]*N
+        output = torch.from_numpy(np.concatenate(output_list)) #[N*M]
+
+        ctx.M_cumsum = M_cumsum
+        ctx.save_for_backward(output)
+        return output
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        if len(ctx.needs_input_grad) < 1 or not ctx.needs_input_grad[0]:
+            raise ValueError('Only gradients for x in the gfusedlasso is implemented')
+        if len(ctx.needs_input_grad) > 1 and ctx.needs_input_grad[1]:
+            raise ValueError('Only gradients for x in the gfusedlasso is implemented')
+        if len(ctx.needs_input_grad) > 2 and ctx.needs_input_grad[2]:
+            raise ValueError('Only gradients for x in the gfusedlasso is implemented')
+        if len(ctx.needs_input_grad) > 3 and ctx.needs_input_grad[3]:
+            raise ValueError('Only gradients for x in the gfusedlasso is implemented')
+
+        M_cumsum = ctx.M_cumsum
+        output, = ctx.saved_tensors
+
+        cuda_flag = grad_output.is_cuda
+        if (cuda_flag):
+            output = output.cpu()
+            grad_output = grad_output.cpu()
+        grad_inp = torch.cat([backward_gfusedmax_torch_1D(
+            output[M_cumsum[i]:M_cumsum[i+1]]
+            ,grad_output[M_cumsum[i]:M_cumsum[i+1]])
+            for i in range(len(M_cumsum)-1)],dim=0)
+        if cuda_flag:
+            grad_inp = grad_inp.cuda()
+
+        return (grad_inp,)+(None,)*(len(ctx.needs_input_grad)-1)
+
 class Gfusedmax(torch.nn.Module):
     def __init__(self,gamma=1.0,lam=1.0):
         super(Gfusedmax,self).__init__()
@@ -145,6 +201,24 @@ class Gfusedmax(torch.nn.Module):
         x = x / self.gamma
         fused_x = self.gfusedlasso_func(x,A,dim)
         output = self.sparsemax_func(fused_x,dim)
+        return output
+
+class GfusedmaxList(torch.nn.Module):
+    def __init__(self,gamma=1.0,lam=1.0):
+        super(GfusedmaxList,self).__init__()
+        self.gamma = gamma
+        self.gfusedlasso_func = lambda x,edge_list,M_cumsum: torch_gfusedlasso_list.apply(x,edge_list,M_cumsum,lam)
+        self.sparsemax_func = lambda x,dim: torch_sparsemax.apply(x,dim)
+    def forward(self,x,edge_list,M_cumsum):
+        '''
+        x's shape = [M*N]
+        edge_list'shape = [[E,2]]*N
+        M_cumsum's shape = [sum(M[:i])]*(N+1)
+
+        return w's shape = [M]*N
+        '''
+        fused_x = self.gfusedlasso_func(x,edge_list,M_cumsum)
+        output = [self.sparsemax_func(fused_x[M_cumsum[i]:M_cumsum[i+1]],-1) for i in range(len(M_cumsum)-1)]
         return output
 
 if __name__ == '__main__':
