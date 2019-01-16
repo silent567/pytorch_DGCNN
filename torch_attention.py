@@ -218,7 +218,7 @@ class FastFlexAddAttention(torch.nn.Module):
         super(FastFlexAddAttention,self).__init__()
         self.max_type = max_type
         if max_type == 'softmax':
-            self.mapping_func = lambda x,edge_list,M_cumsum: maxList(x,M_cumsum,lambda xx:torch.nn.functional.softmax)
+            self.mapping_func = lambda x,edge_list,M_cumsum: maxList(x,M_cumsum,lambda xx:torch.nn.functional.softmax(xx))
         elif max_type == 'sparsemax':
             if gamma is None:
                 self.register_parameter('gamma',torch.nn.Parameter(torch.ones([],dtype=torch.float,requires_grad=True)))
