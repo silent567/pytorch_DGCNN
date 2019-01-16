@@ -6,32 +6,6 @@ import networkx as nx
 from random import choice
 from scipy.spatial.distance import pdist, squareform
 
-def random_community(N,C):
-    comm = np.zeros([N,C])
-    comm[np.arange(N),np.random.choice(C,N)] = 1
-    comm = comm[np.argsort(np.argmax(comm,axis=1))]
-    return comm
-
-def agm_comm2graph(comm,prob):
-    '''
-    generate graph from given community using Affilation Graph Model
-    input:
-        comm is np.ndarray of shape [N,C], where N is the number of nodes, C is the number communities
-        prob is list or np.ndarray of shape [C,] containing probabilities for each community >=0 < 1
-    output:
-        graph adjacency matrix of shape [N,N] with elements in {0,1}
-    '''
-    N,C = comm.shape
-    output = np.zeros([N,N])
-
-    connect_prob = lambda c1,c2:min(1-np.prod(1-comm[i]*comm[j]*prob)+0.1,1.)
-    rand_nums = np.random.rand(N,N)
-    for i in range(N):
-        for j in range(i+1,N):
-            output[i,j] = output[j,i] = 1.*(rand_nums[i,j]<connect_prob(comm[i],comm[j]))
-
-    return output
-
 def generate_random_agm_graph(N,C=None,prob=None):
     if C is None and prob is None:
         raise ValueError('at least one of C and prob is specified')
@@ -84,6 +58,72 @@ def generate_random_eucl_graph(N,C,means,stds,threshold=None,sparsity=None):
 
     return g
 
+def generate_random_classical_graph():
+    func_list = [generate_random_barbell,generate_random_circular_ladder
+                 ,generate_random_complete,generate_random_cycle,generate_random_hypercube
+                 ,generate_random_shrinking_tree,generate_random_tree,generate_random_tri_lattice,generate_random_turan]
+    index = choice(range(len(func_list)))
+    g = func_list[index]()
+    step = choice(range(int(max(len(g.nodes)/10+1,5))))
+    add_noises_to_graph(g,step)
+    return g,index
+
+def generate_random_classical_graph_with_pos_noise():
+    func_list = [generate_pure_random_graph, generate_random_barbell,generate_random_circular_ladder
+                 ,generate_random_complete,generate_random_cycle,generate_random_hypercube
+                 ,generate_random_shrinking_tree,generate_random_tree,generate_random_tri_lattice,generate_random_turan]
+    index = choice(range(len(func_list)))
+    g = func_list[index]()
+    step = choice(range(100))
+    add_pos_noises_to_graph(g,step)
+    return g,index
+
+def generate_component_graph(n_max=200,comp_num_max=20,class_num=10):
+    graph = generate_pure_random_graph(n_max=n_max)
+    comp_num = nx.number_connected_components(graph)
+    while (comp_num > comp_num_max):
+        graph = generate_pure_random_graph(n_max=n_max)
+        comp_num = nx.number_connected_components(graph)
+    return graph,int(comp_num * class_num / comp_num_max)
+
+def generate_node_connectivity_graph(n_max=200,cut_max=100,class_num=10):
+    graph = generate_pure_random_graph(n_max=n_max)
+    if nx.is_connected(graph):
+        cut = nx.minimum_node_cut(graph)
+    else:
+        cut = {}
+    while (len(cut) > cut_max):
+        graph = generate_pure_random_graph(n_max=n_max)
+        if nx.is_connected(graph):
+            cut = nx.minimum_node_cut(graph)
+        else:
+            cut = {}
+    step = cut_max / class_num
+    return graph,int(len(cut) / step)
+
+def graph2str(g,l):
+    graph = nx.to_numpy_array(g)
+    N = graph.shape[0]
+    graph= np.triu(graph)
+    graph *= (1-np.eye(N)).astype('int')
+
+    output = ['%d %d'%(N,l),]
+    for i in range(N):
+        indexes = np.flatnonzero(graph[i])
+        tmp_output = '0 %d'%(len(indexes))
+        for idx in indexes:
+            tmp_output += ' %d'%idx
+        output.append(tmp_output)
+    return output
+
+def graphs2str(g_list,l_list):
+    if len(g_list) != len(l_list):
+        raise ValueError('the length of g_list and l_list should be the same')
+    output = ['%d'%len(g_list),]
+    for g,l in zip(g_list,l_list):
+        output += graph2str(g,l)
+    return output
+
 def plot_graph(g,node_labels=None):
     if node_labels is None:
         if 'comm' in g.nodes(data=True)[random_node(g)]:
@@ -111,6 +151,32 @@ def plot_adjacency_matrix(graph,node_labels=None):
     g = nx.from_numpy_array(graph)
     nx.draw(g,pos=nx.circular_layout(g),node_color=node_labels)
 
+def random_community(N,C):
+    comm = np.zeros([N,C])
+    comm[np.arange(N),np.random.choice(C,N)] = 1
+    comm = comm[np.argsort(np.argmax(comm,axis=1))]
+    return comm
+
+def agm_comm2graph(comm,prob):
+    '''
+    generate graph from given community using Affilation Graph Model
+    input:
+        comm is np.ndarray of shape [N,C], where N is the number of nodes, C is the number communities
+        prob is list or np.ndarray of shape [C,] containing probabilities for each community >=0 < 1
+    output:
+        graph adjacency matrix of shape [N,N] with elements in {0,1}
+    '''
+    N,C = comm.shape
+    output = np.zeros([N,N])
+
+    connect_prob = lambda c1,c2:min(1-np.prod(1-comm[i]*comm[j]*prob)+0.1,1.)
+    rand_nums = np.random.rand(N,N)
+    for i in range(N):
+        for j in range(i+1,N):
+            output[i,j] = output[j,i] = 1.*(rand_nums[i,j]<connect_prob(comm[i],comm[j]))
+
+    return output
+
 def random_node(g):
     nodes = list(g.node)
     return choice(nodes)
@@ -125,26 +191,6 @@ def random_ego_graph(g,n,radius=2):
     labels = [g.nodes[nn]['comm'] for nn in rnodes]
     subgraphs = [ego_graph(g,nn,radius) for nn in rnodes]
     return subgraphs, labels
-
-def graph2str(g,l):
-    graph = nx.to_numpy_array(g)
-    N = graph.shape[0]
-    output = ['%d %d'%(N,l),]
-    for i in range(N):
-        indexes = np.flatnonzero(graph[i])
-        tmp_output = '0 %d'%(len(indexes))
-        for idx in indexes:
-            tmp_output += ' %d'%idx
-        output.append(tmp_output)
-    return output
-
-def graphs2str(g_list,l_list):
-    if len(g_list) != len(l_list):
-        raise ValueError('the length of g_list and l_list should be the same')
-    output = ['%d'%len(g_list),]
-    for g,l in zip(g_list,l_list):
-        output += graph2str(g,l)
-    return output
 
 def random_remove_one_edge(g):
     if len(g.edges) > 0:
@@ -270,26 +316,6 @@ def generate_random_tri_lattice(n=None,n_max=None):
     h = choice(range(2,int(np.sqrt(lattice_num))))
     w = int(lattice_num / h)
     return nx.triangular_lattice_graph(h,w)
-
-def generate_random_classical_graph():
-    func_list = [generate_random_barbell,generate_random_circular_ladder
-                 ,generate_random_complete,generate_random_cycle,generate_random_hypercube
-                 ,generate_random_shrinking_tree,generate_random_tree,generate_random_tri_lattice,generate_random_turan]
-    index = choice(range(len(func_list)))
-    g = func_list[index]()
-    step = choice(range(int(max(len(g.nodes)/10+1,5))))
-    add_noises_to_graph(g,step)
-    return g,index
-
-def generate_random_classical_graph_with_pos_noise():
-    func_list = [generate_pure_random_graph, generate_random_barbell,generate_random_circular_ladder
-                 ,generate_random_complete,generate_random_cycle,generate_random_hypercube
-                 ,generate_random_shrinking_tree,generate_random_tree,generate_random_tri_lattice,generate_random_turan]
-    index = choice(range(len(func_list)))
-    g = func_list[index]()
-    step = choice(range(100))
-    add_pos_noises_to_graph(g,step)
-    return g,index
 
 if __name__ == '__main__':
     N,C = 300,3

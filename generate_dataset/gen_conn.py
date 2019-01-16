@@ -6,7 +6,7 @@ import os,sys
 import argparse
 import multiprocessing as mp
 
-dataset_name = 'CPnew' #classical pattern
+dataset_name = 'CONN' #classical pattern
 curpath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(os.path.join(os.path.dirname(curpath),'data'),dataset_name)
 if (not os.path.exists(datapath)):
@@ -22,9 +22,8 @@ args = parser.parse_args()
 print(args)
 
 S = args.size
-with mp.Pool(20) as p:
-    gens = p.starmap(generate_random_classical_graph,[()]*S)
-# gens = [generate_random_classical_graph() for _ in range(S)]
+with mp.Pool(30) as p:
+    gens = p.starmap(generate_node_connectivity_graph,[()]*S)
 graphs = [gg[0] for gg in gens]
 labels = [gg[1] for gg in gens]
 
