@@ -6,7 +6,7 @@ import os,sys
 import argparse
 import multiprocessing as mp
 
-dataset_name = 'CONN' #classical pattern
+dataset_name = 'CLIQUE' #classical pattern
 curpath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(os.path.join(os.path.dirname(curpath),'data'),dataset_name)
 if (not os.path.exists(datapath)):
@@ -23,7 +23,7 @@ print(args)
 
 S = args.size
 with mp.Pool(10) as p:
-    gens = p.starmap(generate_node_connectivity_graph,[()]*S)
+    gens = p.starmap(generate_subclique_graph,[()]*S)
 graphs = [gg[0] for gg in gens]
 labels = [gg[1] for gg in gens]
 
