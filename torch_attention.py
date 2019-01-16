@@ -260,7 +260,7 @@ class FastFlexAddAttention(torch.nn.Module):
         output_list = [None]*N
         for i,m in enumerate(M_list):
             if m == 0:
-                output_list[i] = torch.zeros([self.output_size],dtype=x[i].dtype,device=x[i].device)
+                output_list[i] = torch.zeros([self.output_size],dtype=x_list[i].dtype,device=x_list[i].device)
 
         x_concat = torch.cat(x_list,dim=0) #[N*M,C]
         proj_x = self.proj_func(x_concat) #[N*M,C'']
@@ -279,7 +279,9 @@ class FastFlexAddAttention(torch.nn.Module):
             for i,w in enumerate(weight_list):
                 weight_list[i] = w.cuda()
 
-        output_list = [torch.sum(proj_x[M_cumsum[i]:M_cumsum[i+1]]*w.unsqueeze(-1),dim=0) for i,w in enumerate(weight_list)]
+        for i,w in enumerate(weight_list):
+            if w.size()[0] > 1:
+                output_list[i] = torch.sum(proj_x[M_cumsum[i]:M_cumsum[i+1]]*w.unsqueeze(-1),dim=0)
         output = torch.stack(output_list,dim=0)
 
         return output
