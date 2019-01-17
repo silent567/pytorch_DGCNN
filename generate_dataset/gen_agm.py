@@ -5,7 +5,7 @@ from util import *
 import os,sys
 import argparse
 
-dataset_name = 'AGM'
+dataset_name = 'AGMsmall'
 comm_probs = [0.1,0.3,0.5]
 curpath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(os.path.join(os.path.dirname(curpath),'data'),dataset_name)

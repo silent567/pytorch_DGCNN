@@ -78,6 +78,14 @@ def generate_random_classical_graph_with_pos_noise():
     add_pos_noises_to_graph(g,step)
     return g,index
 
+def generate_subclique_graph(n_max=200,clique_num_max=50,class_num=10):
+    graph = generate_pure_random_graph(n_max=n_max)
+    clique_num = nx.graph_clique_number(graph)
+    while (clique_num > clique_num_max):
+        graph = generate_pure_random_graph(n_max=n_max)
+        clique_num = nx.graph_clique_number(graph)
+    return graph,int(clique_num * class_num / clique_num_max)
+
 def generate_component_graph(n_max=200,comp_num_max=20,class_num=10):
     graph = generate_pure_random_graph(n_max=n_max)
     comp_num = nx.number_connected_components(graph)
