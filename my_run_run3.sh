@@ -1,5 +1,22 @@
 #!/bin/bash
 
+./my_run3.sh FastMultiAttPool 1 1 0 &
+./my_run3.sh FastMultiAttPool 2 1 0 &
+./my_run3.sh FastMultiAttPool 3 1 0 &
+./my_run3.sh FastMultiAttPool 4 1 1 &
+./my_run3.sh FastMultiAttPool 5 1 1 &
+./my_run3.sh FastMultiAttPool 6 1 1 &
+./my_run3.sh FastMultiAttPool 7 1 2 &
+./my_run3.sh FastMultiAttPool 8 1 2 &
+./my_run3.sh FastMultiAttPool 9 1 2 &
+#./my_run3.sh FastMultiAttPool 1 1 3 &
+#./my_run3.sh FastMultiAttPool 2 1 3 &
+# ./my_run3.sh FastMultiAttPool 2 1 3 &
+#./my_run3.sh FastMultiAttPool 3 1 4 &
+#./my_run3.sh FastMultiAttPool 4 1 4 &
+# ./my_run3.sh FastMultiAttPool 2 1 4 &
+#./my_run3.sh FastMultiAttPool 5 1 5 &
+#./my_run3.sh FastMultiAttPool 7 1 5 &
 #./my_run3.sh FastMultiAttPool 1 1 3 &
 #./my_run3.sh FastMultiAttPool 2 1 3 &
 # ./my_run3.sh FastMultiAttPool 2 1 3 &
@@ -9,7 +26,6 @@
 #./my_run3.sh FastMultiAttPool 4 1 4 &
 # ./my_run3.sh FastMultiAttPool 2 1 4 &
 #./my_run3.sh FastMultiAttPool 5 3 5 &
-#./my_run3.sh FastMultiAttPool 8 2 5 &
 # ./my_run3.sh FastMultiAttPool 5 1 5 &
 #./my_run3.sh FastMultiAttPool 8 1 6 &
 #./my_run3.sh FastMultiAttPool 9 1 6 &
