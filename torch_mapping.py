@@ -194,7 +194,7 @@ class torch_gfusedlasso_list(torch.autograd.Function):
 class Gfusedmax(torch.nn.Module):
     def __init__(self,gamma=1.0,lam=1.0):
         super(Gfusedmax,self).__init__()
-        self.gamma = gamma
+        self.gamma = gamma /(lam if not isinstance(lam,torch.Tensor) else lam.item()) #removing the effects of scaling of lambda for gfusedlasso
         self.gfusedlasso_func = lambda x,A,dim: torch_gfusedlasso.apply(x,A,dim,lam)
         self.sparsemax_func = lambda x,dim: torch_sparsemax.apply(x,dim)
     def forward(self,x,A,dim=-1):
@@ -206,7 +206,7 @@ class Gfusedmax(torch.nn.Module):
 class GfusedmaxList(torch.nn.Module):
     def __init__(self,gamma=1.0,lam=1.0):
         super(GfusedmaxList,self).__init__()
-        self.gamma = gamma
+        self.gamma = gamma /(lam if not isinstance(lam,torch.Tensor) else lam.item()) #removing the effects of scaling of lambda for gfusedlasso
         self.gfusedlasso_func = lambda x,edge_list,M_cumsum: torch_gfusedlasso_list.apply(x,edge_list,M_cumsum,lam)
         self.sparsemax_func = lambda x,dim: torch_sparsemax.apply(x,dim)
     def forward(self,x,edge_list,M_cumsum):
