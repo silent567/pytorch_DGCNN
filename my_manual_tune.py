@@ -23,6 +23,9 @@ hyperparameter_choices = {
     'gnn_batch_norm_flag': [True],
     'head_cnt':list(range(1,2)),
 }
+hyperparameters = list(hyperparameter_choices.keys())
+hyperparameters.sort()
+hp2index = {hp:i for i,hp in enumerate(hyperparameters)}
 
 param_num = 300
 record = np.zeros([param_num,len(hyperparameter_choices)+1])
@@ -32,6 +35,7 @@ np.savetxt(record_name, record, delimiter=',')
 for n in range(param_num):
     np.random.seed(int(time.time()))
     for param_index,(k,v) in enumerate(hyperparameter_choices.items()):
+        param_index = hp2index[k]
         print(param_index,k)
         value_index = np.random.choice(len(v))
         if isinstance(v[value_index],str) or v[value_index] is None:
