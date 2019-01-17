@@ -6,7 +6,7 @@ import os,sys
 import argparse
 import multiprocessing as mp
 
-dataset_name = 'COMP' #classical pattern
+dataset_name = 'COMPsmall' #classical pattern
 curpath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(os.path.join(os.path.dirname(curpath),'data'),dataset_name)
 if (not os.path.exists(datapath)):
