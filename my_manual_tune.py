@@ -15,7 +15,7 @@ hyperparameter_choices = {
     'l2':[0,] + list(10**np.arange(-6.,-3.,1.)),
     'dropout': [True,False],
     'norm_flag': [True,False],
-    'gamma':list(10**np.arange(1,2,0.5)),
+    'gamma':list(10**np.arange(0.5,2,0.5)),
     'lam':list(10**np.arange(0,1,0.5)),
     'layer_number':list(range(1,4)),
     'batch_norm_flag': [True,],
@@ -23,6 +23,9 @@ hyperparameter_choices = {
     'gnn_batch_norm_flag': [True],
     'head_cnt':list(range(1,2)),
 }
+hyperparameters = list(hyperparameter_choices.keys())
+hyperparameters.sort()
+hp2index = {hp:i for i,hp in enumerate(hyperparameters)}
 
 param_num = 300
 record = np.zeros([param_num,len(hyperparameter_choices)+1])
@@ -32,6 +35,7 @@ np.savetxt(record_name, record, delimiter=',')
 for n in range(param_num):
     np.random.seed(int(time.time()))
     for param_index,(k,v) in enumerate(hyperparameter_choices.items()):
+        param_index = hp2index[k]
         print(param_index,k)
         value_index = np.random.choice(len(v))
         if isinstance(v[value_index],str) or v[value_index] is None:
