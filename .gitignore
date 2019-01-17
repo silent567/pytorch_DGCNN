@@ -4,8 +4,8 @@ result.txt
 extracted_features*
 env
 data/*CP*
-data/AGM
-data/CLIQUE
-data/COMP
-data/CONN
+data/AGM*
+data/CLIQUE*
+data/COMP*
+data/CONN*
 
