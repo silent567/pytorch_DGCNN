@@ -85,7 +85,7 @@ cmd_args.gm = params[-6]
 print(cmd_args)
 
 
-# In[8]:
+# In[6]:
 
 
 cmd_args.data = 'COMPsmall'
@@ -95,7 +95,7 @@ print('# train: %d, # test: %d' % (len(train_graphs), len(test_graphs)))
 print(cmd_args)
 
 
-# In[9]:
+# In[7]:
 
 
 if cmd_args.sortpooling_k <= 1:
@@ -105,7 +105,7 @@ if cmd_args.sortpooling_k <= 1:
     print('k used in SortPooling is: ' + str(cmd_args.sortpooling_k))
 
 
-# In[10]:
+# In[8]:
 
 
 
@@ -114,7 +114,7 @@ model = Classifier(cmd_args)
 model.load_state_dict(torch.load(model_name,map_location='cpu'))
 
 
-# In[11]:
+# In[9]:
 
 
 def myPrepareFeatureLabel(batch_graph,):
@@ -229,7 +229,7 @@ def myS2V(s2v,graph_list,node_feat,edge_feat):
 embed = myS2V(model.s2v,batch_graph,node_feat,None)
 
 
-# In[15]:
+# In[11]:
 
 
 from torch_attention import *
@@ -334,7 +334,7 @@ def myS2V_with_weight(s2v,graph_list,node_feat,edge_feat):
     return embed, att_aggr_weights
 
 
-# In[19]:
+# In[12]:
 
 
 index = np.random.choice(len(test_graphs),50)
@@ -348,7 +348,7 @@ logits, loss, acc =  model.mlp(embed, labels)
 print(acc)
 
 
-# In[16]:
+# In[13]:
 
 
 def build_graph(graph):
@@ -390,14 +390,14 @@ def plot_adjacency_matrix(graph,node_labels=None):
     nx.draw(g,pos=nx.circular_layout(g),node_color=node_labels)
 
 
-# In[17]:
+# In[14]:
 
 
 patterns = ['barbell','circular_ladder','complete','cycle','hypercube','shrinking_tree','tree','tri_lattice','turan']
 pattern2index = {p:i for i,p in enumerate(patterns)}
 
 
-# In[18]:
+# In[15]:
 
 
 '''
@@ -446,7 +446,7 @@ def reset_cmd_args():
     cmd_args.test_number=0
 
 
-# In[ ]:
+# In[49]:
 
 
 #reset_cmd_args()
@@ -476,6 +476,12 @@ nx.draw(g,pos=nx.circular_layout(g),node_color=weights[1][0].detach().numpy())
 plt.show()
 nx.draw(g,node_color=weights[1][0].detach().numpy())
 plt.show()
+
+
+# In[ ]:
+
+
+
 
 
 # In[156]:
