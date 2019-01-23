@@ -22,7 +22,7 @@ args = parser.parse_args()
 print(args)
 
 S = args.size
-with mp.Pool(10) as p:
+with mp.Pool(30) as p:
     gens = p.starmap(generate_subclique_graph,[()]*S)
 graphs = [gg[0] for gg in gens]
 labels = [gg[1] for gg in gens]
