@@ -16,7 +16,7 @@ sys.path.append('%s/pytorch_structure2vec-master/s2v_lib' % os.path.dirname(os.p
 from s2v_lib import S2VLIB
 from pytorch_util import weights_init, gnn_spmm
 
-from torch_attention import FlexAddAttention, FastFlexAddAttention
+from attpool.torch_attention import FlexAddAttention, FastFlexAddAttention
 
 class SumPool(nn.Module):
     def __init__(self, output_dim, num_node_feats, num_edge_feats, latent_dim=[32, 32, 32, 1], k=30, conv1d_channels=[16, 32], conv1d_kws=[0, 5]):
