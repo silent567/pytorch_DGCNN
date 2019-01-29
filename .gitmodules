@@ -1,0 +1,4 @@
+[submodule "attpool"]
+	path = attpool
+	url = https://github.com/silent567/attpool.git
+	branch = master
