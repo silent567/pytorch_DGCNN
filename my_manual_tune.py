@@ -16,7 +16,7 @@ hyperparameter_choices = {
     'dropout': [True,False],
     'norm_flag': [True,False],
     'gamma':list(10**np.arange(0.5,2,0.5)),
-    'lam':list(10**np.arange(0,1,0.5)),
+    'lam':list(10**np.arange(-0.5,1,0.5)),
     'layer_number':list(range(1,4)),
     'batch_norm_flag': [True,],
     'residual_flag': [True,False],
