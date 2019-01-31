@@ -235,8 +235,8 @@ def main(cmd_args):
             torch.save(classifier.state_dict(),'model_%s_%s_%s_%d_%.2f_%.2f.pt'%
                     (cmd_args.gm,cmd_args.data,cmd_args.max_type,int(cmd_args.norm_flag),cmd_args.gamma,cmd_args.lam))
 
-    with open('%s_%s_acc_results_%s_%d_%.2f_%.2f.txt'%(cmd_args.gm,cmd_args.data,cmd_args.max_type,int(cmd_args.norm_flag),cmd_args.gamma,cmd_args.lam), 'a+') as f:
-        f.write(str(test_loss[1]) + '\n')
+    # with open('%s_%s_acc_results_%s_%d_%.2f_%.2f.txt'%(cmd_args.gm,cmd_args.data,cmd_args.max_type,int(cmd_args.norm_flag),cmd_args.gamma,cmd_args.lam), 'a+') as f:
+        # f.write(str(test_loss[1]) + '\n')
 
     if cmd_args.printAUC:
         with open('auc_results.txt', 'a+') as f:

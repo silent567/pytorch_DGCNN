@@ -64,7 +64,7 @@ def generate_random_classical_graph():
                  ,generate_random_shrinking_tree,generate_random_tree,generate_random_tri_lattice,generate_random_turan]
     index = choice(range(len(func_list)))
     g = func_list[index]()
-    step = choice(range(int(max(len(g.nodes)/10+1,5))))
+    step = choice(range(int(len(g.nodes)/4+1)))
     add_noises_to_graph(g,step)
     return g,index
 
