@@ -22,12 +22,13 @@ hyperparameter_choices = {
     'residual_flag': [True,False],
     'gnn_batch_norm_flag': [True],
     'head_cnt':list(range(1,2)),
+    'max_type':['gfusedmax','softmax','sparsemax'],
 }
 hyperparameters = list(hyperparameter_choices.keys())
 hyperparameters.sort()
 hp2index = {hp:i for i,hp in enumerate(hyperparameters)}
 
-param_num = 300
+param_num = 30000
 record = np.zeros([param_num,len(hyperparameter_choices)+1])
 record_name = './manual_record/%s_%s_record_%s.csv'%(cmd_args.gm, cmd_args.data
             ,time.strftime('%Y-%m-%d_%H-%M-%S',time.localtime()))
