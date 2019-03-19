@@ -10,18 +10,18 @@ from util import cmd_args
 cmd_args.mode = 'gpu' if torch.cuda.is_available() else 'cpu'
 
 hyperparameter_choices = {
-    'learning_rate':list(10**np.arange(-4,-2,0.5)),
+    'learning_rate':list(10**np.arange(-5,-1,0.2)),
     'num_epochs':[int(n*100) for n in range(1,4)],
     'l2':[0,] + list(10**np.arange(-6.,-3.,1.)),
-    'dropout': [True,False],
-    'norm_flag': [True,False],
-    'gamma':list(10**np.arange(0.5,2,0.5)),
-    'lam':list(10**np.arange(-0.5,1,0.5)),
+    'dropout': [True,],
+    'norm_flag': [False],
+    'gamma':list(10**np.arange(-1,2,0.2)),
+    'lam':list(10**np.arange(-1,2,0.2)),
     'layer_number':list(range(1,4)),
     'batch_norm_flag': [True,],
-    'residual_flag': [True,False],
+    'residual_flag': [False],
     'gnn_batch_norm_flag': [True],
-    'head_cnt':list(range(1,2)),
+    'head_cnt':list(range(1,4)),
     'max_type':['gfusedmax','softmax','sparsemax'],
 }
 hyperparameters = list(hyperparameter_choices.keys())
