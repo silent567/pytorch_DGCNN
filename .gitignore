@@ -3,6 +3,7 @@ pytorch_structure2vec-master/
 result.txt
 extracted_features*
 env
+env10
 data/*CP*
 data/AGM*
 data/CLIQUE*
