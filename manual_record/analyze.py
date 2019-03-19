@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 # coding: utf-8
 
 # In[1]:
@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 
 
 dataset_list = ['MUTAG','PTC','PROTEINS','NCI1','NCI109','COLLAB','IMDBBINARY','IMDBMULTI','DD','ENZYMES']
-record_dir = './0129_before_fixing_confusing_gamma_lam/'
+#record_dir = './0129_before_fixing_confusing_gamma_lam/'
+record_dir = './'
 for i,dataset_name in enumerate(dataset_list):
     try:
         print(dataset_name)
@@ -24,6 +25,14 @@ for i,dataset_name in enumerate(dataset_list):
         print(filenames)
         print(records.shape)
         print(records[np.argmax(records[:,-1])])
+        print(records[records[:,9]==0][np.argmax(records[records[:,9]==0][:,-1])])
+        print('%.2f & %.2f & %.2f'%(100*np.max(records[records[:,9]==0][:,-1]),100*np.max(records[records[:,9]==1][:,-1]),100*np.max(records[records[:,9]==2][:,-1])))
     except:
         pass
+
+
+# In[ ]:
+
+
+
 
