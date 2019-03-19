@@ -86,6 +86,34 @@ def generate_subclique_graph(n_max=200,clique_num_max=50,class_num=10):
         clique_num = nx.graph_clique_number(graph)
     return graph,int(clique_num * class_num / clique_num_max)
 
+def generate_subclique2_graph(n_max=200,clique_num_max=50, clique_num_min=10, class_num=5):
+    n = choice(range(max(5,clique_num_max),200 if n_max is None else n_max))
+    clique_num = choice(range(clique_num_min, clique_num_max))
+    graph = nx.gnp_random_graph(n,0.5)
+    perm_index = np.random.permutation(n)
+    A = nx.to_numpy_array(graph)
+    A[:clique_num,:clique_num] = 1
+    A = A[perm_index][perm_index]
+    A *= (1-np.eye(n))
+    graph = nx.from_numpy_array(A)
+    return graph,int((clique_num - clique_num_min) * class_num / (clique_num_max - clique_num_min))
+
+def generate_subclique3_graph(n_max=200,clique_num=10,noise_level=0.2):
+    n = choice(range(clique_num*2,n_max))
+    label = choice(range(2))
+    graph = nx.gnp_random_graph(n,0.5)
+    perm_index = np.random.permutation(n)
+    A = nx.to_numpy_array(graph)
+    if label:
+        A[:clique_num,:clique_num] = 1
+    else:
+        noise_graph = nx.gnp_random_graph(clique_num,1-noise_level)
+        A[:clique_num,:clique_num] = nx.to_numpy_array(noise_graph)
+    A = A[perm_index][perm_index]
+    A *= (1-np.eye(n))
+    graph = nx.from_numpy_array(A)
+    return graph,label
+
 def generate_component_graph(n_max=200,comp_num_max=20,class_num=10):
     graph = generate_pure_random_graph(n_max=n_max)
     comp_num = nx.number_connected_components(graph)
