@@ -1,4 +1,24 @@
-PyTorch DGCNN
+Original repo: https://github.com/muhanzhang/pytorch_DGCNN
+
+Hao.Tang's improved version: https://github.com/silent567/pytorch_DGCNN
+
+Requires: [attpool](https://gitlab.com/hao.tang/attpool), matplotlib, jupyter, numpy, tqdm networkx, etc...
+
+Quick Setup: 
+- install all things related to attpool, then put attpool repo in the root directory. 
+- install all requried packages
+- following the below instructions to install structure2vec
+
+Brief Description of Entry Files:
+- `my_tune.py my_manual_tune.py`: Hyper-parameter searching files of DGCNN+attentional pooling
+- `my_main.py`: Hyper-parameter in, Performance out, DGCNN+attentional pooling
+- `my_embedding.py`: model file, DGCNN+attentional pooling
+- `main.py`: Hyper-parameter in, Performance out, original DGCNN
+- `DGCNN_embedding.py`: model file, original DGCNN
+Use `python3 <filename> -h` for more details of each file
+
+
+Original README
 =============
 
 Updates 6/13/2018
