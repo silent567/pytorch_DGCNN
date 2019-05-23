@@ -15,6 +15,7 @@ Brief Description of Entry Files:
 - `my_embedding.py`: model file, DGCNN+attentional pooling
 - `main.py`: Hyper-parameter in, Performance out, original DGCNN
 - `DGCNN_embedding.py`: model file, original DGCNN
+
 Use `python3 <filename> -h` for more details of each file
 
 
