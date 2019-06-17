@@ -261,4 +261,5 @@ def cross_validate(cmd_args):
     return np.mean(acc_results)
 
 if __name__ == '__main__':
-    main(cmd_args)
+    cross_val_acc = cross_validate(cmd_args)
+    print('Final cross validation accuracy:', cross_val_acc)
